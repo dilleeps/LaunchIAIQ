@@ -1,0 +1,22 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+body {
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.font-display { font-family: 'Fraunces', Georgia, serif; }
+.font-mono { font-family: 'JetBrains Mono', ui-monospace, monospace; }
+
+.rag-Green  { background-color: #EDF5EF; color: #2F7D4F; }
+.rag-Amber  { background-color: #FAF1E0; color: #B8740A; }
+.rag-Red    { background-color: #FBE8EB; color: #C8102E; }
+.rag-Pending { background-color: #F4F4F4; color: #666666; }
+
+.chip { display:inline-block; padding:2px 8px; border-radius:9999px; font-size:11px; letter-spacing:0.04em; text-transform:uppercase; font-weight:500; font-family:'JetBrains Mono',ui-monospace,monospace; }

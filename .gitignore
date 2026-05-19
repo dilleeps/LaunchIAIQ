@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.env
+.env.local
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Node
+node_modules/
+dist/
+build/
+.vite/
+*.log
+
+# IDE
+.vscode/
+.idea/
+.DS_Store
+
+# DB
+*.sqlite
+*.db
+postgres_data/
+tsconfig.tsbuildinfo
