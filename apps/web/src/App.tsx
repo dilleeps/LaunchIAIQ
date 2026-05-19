@@ -8,8 +8,12 @@ import { Matrix } from "./pages/Matrix";
 import { Milestones } from "./pages/Milestones";
 import { LaunchDetail } from "./pages/LaunchDetail";
 import { LaunchList } from "./pages/LaunchList";
-import { Admin } from "./pages/Admin";
-import { Stub } from "./pages/Stub";
+import { Settings } from "./pages/Settings";
+import { Timeline } from "./pages/Timeline";
+import { DependenciesGraph } from "./pages/DependenciesGraph";
+import { Scenarios } from "./pages/Scenarios";
+import { Risks } from "./pages/Risks";
+import { Reports } from "./pages/Reports";
 import { useAuth } from "./hooks/useAuth";
 
 const qc = new QueryClient({ defaultOptions: { queries: { staleTime: 30_000 } } });
@@ -32,15 +36,16 @@ export default function App() {
         <Route path="/login" element={<Login />} />
         <Route element={<RequireAuth><AppShell /></RequireAuth>}>
           <Route index element={<Overview />} />
+          <Route path="timeline" element={<Timeline />} />
           <Route path="matrix" element={<Matrix />} />
+          <Route path="dependencies" element={<DependenciesGraph />} />
+          <Route path="risks" element={<Risks />} />
           <Route path="milestones" element={<Milestones />} />
+          <Route path="scenarios" element={<Scenarios />} />
           <Route path="launches" element={<LaunchList />} />
           <Route path="launches/:id" element={<LaunchDetail />} />
-          <Route path="admin" element={<Admin />} />
-          <Route path="timeline" element={<Stub title="Timeline." message="Gantt-style view of all launches across FY26-FY27. Critical path highlighted from the dependencies graph." />} />
-          <Route path="dependencies" element={<Stub title="Dependencies graph." message="Force-directed visualisation of every typed link in the portfolio. Click a node to see what depends on it." />} />
-          <Route path="risks" element={<Stub title="Portfolio risks." message="Cross-launch risk register with likelihood × impact scoring, sortable by score and ageing." />} />
-          <Route path="reports" element={<Stub title="Reports." message="PDF / Excel exports of any view, scheduled distribution to stakeholders." />} />
+          <Route path="reports" element={<Reports />} />
+          <Route path="admin" element={<Settings />} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

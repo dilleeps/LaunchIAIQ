@@ -2,21 +2,40 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  color-scheme: light;
+@layer base {
+  :root {
+    /* shadcn-convention CSS vars: space-separated HSL, no hsl() wrapper. */
+    --background: 0 0% 100%;
+    --foreground: 0 0% 10%;
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 45%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 10%;
+    --border: 0 0% 90%;
+    --input: 0 0% 90%;
+    --ring: 177 62% 23%;
+    --primary: 177 62% 23%;       /* #165d59 */
+    --primary-foreground: 0 0% 100%;
+    --primary-dark: 177 65% 15%;
+    --primary-soft: 177 25% 92%;
+    --destructive: 0 75% 42%;
+    --destructive-foreground: 0 0% 100%;
+    --radius: 0.5rem;
+  }
+
+  * { border-color: hsl(var(--border)); }
+  body { color: hsl(var(--foreground)); background: hsl(var(--background)); font-size: 14px; line-height: 1.5; }
 }
 
-body {
-  font-size: 14px;
-  line-height: 1.5;
+@layer components {
+  .chip {
+    @apply inline-block px-2 py-0.5 rounded-full text-[11px] tracking-wider font-medium font-mono uppercase;
+  }
+  .rag-Green   { @apply bg-[#EDF5EF] text-[#2F7D4F]; }
+  .rag-Amber   { @apply bg-[#FAF1E0] text-[#B8740A]; }
+  .rag-Red     { @apply bg-[#FBE8EB] text-[#C8102E]; }
+  .rag-Pending { @apply bg-paper-3 text-mute-2; }
 }
 
 .font-display { font-family: 'Fraunces', Georgia, serif; }
-.font-mono { font-family: 'JetBrains Mono', ui-monospace, monospace; }
-
-.rag-Green  { background-color: #EDF5EF; color: #2F7D4F; }
-.rag-Amber  { background-color: #FAF1E0; color: #B8740A; }
-.rag-Red    { background-color: #FBE8EB; color: #C8102E; }
-.rag-Pending { background-color: #F4F4F4; color: #666666; }
-
-.chip { display:inline-block; padding:2px 8px; border-radius:9999px; font-size:11px; letter-spacing:0.04em; text-transform:uppercase; font-weight:500; font-family:'JetBrains Mono',ui-monospace,monospace; }
+.font-mono    { font-family: 'JetBrains Mono', ui-monospace, monospace; }

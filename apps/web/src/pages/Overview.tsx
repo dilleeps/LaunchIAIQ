@@ -29,7 +29,7 @@ export function Overview() {
         right={
           <div className="flex gap-2">
             <button className="px-3 py-2 border border-line rounded text-sm hover:bg-paper-3 font-mono uppercase tracking-wider text-[11px]">Export</button>
-            <button className="px-3 py-2 bg-accent text-paper rounded text-sm hover:bg-accent-dark font-mono uppercase tracking-wider text-[11px]">+ New launch</button>
+            <button className="px-3 py-2 bg-primary text-paper rounded text-sm hover:bg-primary-dark font-mono uppercase tracking-wider text-[11px]">+ New launch</button>
           </div>
         }
       />
@@ -103,7 +103,7 @@ export function Overview() {
 
 function StatCard({ label, value, note, accent }: { label: string; value: string; note?: string; accent?: boolean }) {
   return (
-    <div className={`border rounded-lg p-5 ${accent ? "border-accent bg-accent-soft" : "border-line bg-paper"}`}>
+    <div className={`border rounded-lg p-5 ${accent ? "border-primary bg-primary-soft" : "border-line bg-paper"}`}>
       <div className="font-mono text-[10px] uppercase tracking-widest text-mute">{label}</div>
       <div className="font-display text-3xl tracking-tight mt-2 leading-tight">{value}</div>
       {note && <div className="text-xs text-mute-2 mt-2">{note}</div>}

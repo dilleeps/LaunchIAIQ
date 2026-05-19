@@ -1,5 +1,6 @@
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import React, { useState } from "react";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { Button } from "../components/ui/button";
 import { useParams } from "react-router-dom";
 import { api } from "../lib/api";
 import type {
@@ -43,7 +44,7 @@ export function LaunchDetail() {
               key={t}
               onClick={() => setTab(t)}
               className={`py-3 text-sm font-mono uppercase tracking-wider border-b-2 ${
-                tab === t ? "border-accent text-accent" : "border-transparent text-mute hover:text-ink-2"
+                tab === t ? "border-primary text-primary" : "border-transparent text-mute hover:text-ink-2"
               }`}
             >
               {t}
@@ -109,7 +110,7 @@ function MilestonesTab({ launchId }: { launchId: string }) {
         {data?.map((m) => (
           <tr key={m.id} className="border-b border-line last:border-0">
             <td className="p-3 font-mono text-xs">{m.target_date}</td>
-            <td className="p-3">{m.is_gate && <span className="text-accent mr-1">★</span>}{m.name}</td>
+            <td className="p-3">{m.is_gate && <span className="text-primary mr-1">★</span>}{m.name}</td>
             <td className="p-3 text-mute-2">{m.status}</td>
             <td className="p-3 font-mono text-xs">{m.weight}</td>
           </tr>
@@ -124,13 +125,34 @@ function RisksTab({ launchId }: { launchId: string }) {
     queryKey: ["risks", launchId],
     queryFn: () => api<Risk[]>(`/risks?launch_id=${launchId}`),
   });
+  const [aiSummary, setAiSummary] = React.useState<string | null>(null);
+  const summarize = useMutation({
+    mutationFn: () =>
+      api<{ summary: string; source: string }>("/assistant/summarize-risks", {
+        method: "POST",
+        body: JSON.stringify({ launch_id: launchId }),
+      }),
+    onSuccess: (r) => setAiSummary(r.summary),
+  });
   return (
     <div className="space-y-3">
+      <div className="flex items-center justify-between">
+        <div className="text-sm text-mute-2">{data?.length ?? 0} risks linked to this launch.</div>
+        <Button size="sm" variant="outline" onClick={() => summarize.mutate()} disabled={summarize.isPending}>
+          {summarize.isPending ? "Thinking…" : "✦ AI summary"}
+        </Button>
+      </div>
+      {aiSummary && (
+        <div className="border-l-2 border-primary bg-primary-soft/30 p-4 rounded">
+          <div className="font-mono text-[10px] uppercase tracking-widest text-primary mb-2">AI summary</div>
+          <div className="text-sm whitespace-pre-line">{aiSummary}</div>
+        </div>
+      )}
       {data?.length === 0 && <div className="text-mute">No risks linked to this launch.</div>}
       {data?.map((r) => (
         <div key={r.id} className="border border-line rounded p-4 bg-paper">
           <div className="flex items-center gap-3 mb-2">
-            <span className="chip rag-Red">Score {r.score}</span>
+            <span className={`chip ${r.score >= 6 ? "rag-Red" : r.score >= 4 ? "rag-Amber" : "rag-Green"}`}>Score {r.score}</span>
             <span className="font-mono text-[11px] uppercase tracking-wider text-mute">{r.category}</span>
             <span className="font-mono text-[11px] uppercase tracking-wider text-mute">L:{r.likelihood} · I:{r.impact}</span>
           </div>

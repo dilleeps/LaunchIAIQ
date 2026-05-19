@@ -13,21 +13,7 @@ from .base import BaseConnector
 class _Stub(BaseConnector):
     def sync(self, db: Session, connector_row: IntegrationConnector) -> dict[str, Any]:
         self._stamp(db, connector_row, "not_implemented")
-        return {"ok": False, "error": f"{self.kind} connector is not implemented in Phase 1"}
-
-
-class ClinicalTrialsConnector(_Stub):
-    kind = "clinicaltrials_gov"
-    label = "ClinicalTrials.gov — trial registry"
-    auth = "none"
-    phase = 1
-
-
-class DailyMedConnector(_Stub):
-    kind = "dailymed"
-    label = "DailyMed (NIH) — structured product labels"
-    auth = "none"
-    phase = 1
+        return {"ok": False, "error": f"{self.kind} connector is not implemented yet"}
 
 
 class VeevaVaultRIMConnector(_Stub):

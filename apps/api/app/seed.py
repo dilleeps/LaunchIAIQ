@@ -6,12 +6,15 @@ Run: `python -m app.seed`
 """
 from __future__ import annotations
 
+import json
+import uuid
 from datetime import date
 
-from sqlalchemy import select
+from sqlalchemy import select, text
 
 from .database import SessionLocal, engine, Base
 from .integrations.openfda import ensure_source
+from .migrations_phase2 import apply_phase2_migrations
 from .models import (
     Asset,
     Country,
@@ -87,6 +90,7 @@ def _get_or_create(db, model, defaults=None, **kwargs):
 
 def run() -> None:
     Base.metadata.create_all(bind=engine)
+    apply_phase2_migrations(engine)
     db = SessionLocal()
     try:
         # Org + admin
@@ -351,6 +355,188 @@ def run() -> None:
                     enabled=True,
                 )
             )
+
+        db.commit()
+
+        # ---------- Phase 2-4 demo data (idempotent) ----------
+        l001 = launches_by_code["L-001"]
+        l002 = launches_by_code["L-002"]
+        l004 = launches_by_code["L-004"]
+        l005 = launches_by_code["L-005"]
+
+        # Stage gates on L-001
+        existing_gates = {
+            r["name"]
+            for r in db.execute(
+                text("SELECT name FROM stage_gates WHERE launch_id = :lid"),
+                {"lid": str(l001.id)},
+            ).mappings().all()
+        }
+        gates_seed = [
+            ("Reg Approval Gate", ["global_admin"]),
+            ("Launch Go/No-Go", ["global_brand_lead"]),
+        ]
+        for gname, roles in gates_seed:
+            if gname in existing_gates:
+                continue
+            db.execute(
+                text(
+                    "INSERT INTO stage_gates (id, launch_id, name, required_role_names, status) "
+                    "VALUES (:id, :lid, :name, CAST(:roles AS jsonb), 'pending')"
+                ),
+                {
+                    "id": str(uuid.uuid4()),
+                    "lid": str(l001.id),
+                    "name": gname,
+                    "roles": json.dumps(roles),
+                },
+            )
+
+        # Reference pricing link DEU -> FRA
+        existing_rpl = db.execute(
+            text(
+                "SELECT 1 FROM reference_pricing_links WHERE source_launch_id = :s AND target_launch_id = :t"
+            ),
+            {"s": str(l002.id), "t": str(l005.id)},
+        ).first()
+        if not existing_rpl:
+            db.execute(
+                text(
+                    "INSERT INTO reference_pricing_links (id, source_launch_id, target_launch_id, weight, basket_role) "
+                    "VALUES (:id, :s, :t, 1.0, 'anchor')"
+                ),
+                {"id": str(uuid.uuid4()), "s": str(l002.id), "t": str(l005.id)},
+            )
+
+        # FX EUR->USD 2026
+        existing_fx = db.execute(
+            text(
+                "SELECT 1 FROM fx_assumptions WHERE org_id = :org AND from_ccy = 'EUR' AND to_ccy = 'USD' AND year = 2026"
+            ),
+            {"org": str(org.id)},
+        ).first()
+        if not existing_fx:
+            db.execute(
+                text(
+                    "INSERT INTO fx_assumptions (id, org_id, from_ccy, to_ccy, year, rate, version, source) "
+                    "VALUES (:id, :org, 'EUR', 'USD', 2026, 1.08, 1, 'manual')"
+                ),
+                {"id": str(uuid.uuid4()), "org": str(org.id)},
+            )
+
+        # Forecast drivers on L-001's forecast
+        l001_fc = db.query(Forecast).filter(Forecast.launch_id == l001.id).first()
+        if l001_fc:
+            existing_drivers = {
+                r["driver"]
+                for r in db.execute(
+                    text("SELECT driver FROM forecast_drivers WHERE forecast_id = :fid"),
+                    {"fid": str(l001_fc.id)},
+                ).mappings().all()
+            }
+            drivers_seed = [
+                ("penetration", 0.7, 1.0, 1.3),
+                ("price", 0.85, 1.0, 1.1),
+            ]
+            for dname, lo, ba, hi in drivers_seed:
+                if dname in existing_drivers:
+                    continue
+                db.execute(
+                    text(
+                        "INSERT INTO forecast_drivers (id, forecast_id, driver, low, base, high) "
+                        "VALUES (:id, :fid, :d, :l, :b, :h)"
+                    ),
+                    {
+                        "id": str(uuid.uuid4()),
+                        "fid": str(l001_fc.id),
+                        "d": dname,
+                        "l": lo,
+                        "b": ba,
+                        "h": hi,
+                    },
+                )
+
+        # Actuals on L-004 (Launch phase) for 3 months at 80% of pro-rated Y1 forecast
+        l004_fc = db.query(Forecast).filter(Forecast.launch_id == l004.id).first()
+        if l004_fc and l004_fc.y1_patients:
+            monthly_patients_target = l004_fc.y1_patients / 12.0
+            monthly_sales_target = (l004_fc.y1_patients * (l004_fc.y1_net_price or 0)) / 12.0
+            actual_patients = round(monthly_patients_target * 0.8)
+            actual_sales = monthly_sales_target * 0.8
+            for period in ("2026-03", "2026-04", "2026-05"):
+                existing_act = db.execute(
+                    text("SELECT 1 FROM actuals WHERE launch_id = :lid AND period = :p"),
+                    {"lid": str(l004.id), "p": period},
+                ).first()
+                if existing_act:
+                    continue
+                db.execute(
+                    text(
+                        "INSERT INTO actuals (id, launch_id, period, net_sales, patients, source) "
+                        "VALUES (:id, :lid, :p, :ns, :pt, 'seed')"
+                    ),
+                    {
+                        "id": str(uuid.uuid4()),
+                        "lid": str(l004.id),
+                        "p": period,
+                        "ns": actual_sales,
+                        "pt": actual_patients,
+                    },
+                )
+                # Variance alerts (80% of target → -20% variance, exceeds 10% threshold)
+                for metric, forecast_val, actual_val in (
+                    ("patients", monthly_patients_target, actual_patients),
+                    ("net_sales", monthly_sales_target, actual_sales),
+                ):
+                    if forecast_val == 0:
+                        continue
+                    var_pct = (actual_val - forecast_val) / forecast_val * 100.0
+                    existing_va = db.execute(
+                        text(
+                            "SELECT 1 FROM variance_alerts WHERE launch_id = :lid AND period = :p AND metric = :m"
+                        ),
+                        {"lid": str(l004.id), "p": period, "m": metric},
+                    ).first()
+                    if existing_va:
+                        continue
+                    db.execute(
+                        text(
+                            "INSERT INTO variance_alerts (id, launch_id, period, metric, forecast_value, actual_value, variance_pct, threshold_pct, status) "
+                            "VALUES (:id, :lid, :p, :m, :f, :a, :v, 10.0, 'open')"
+                        ),
+                        {
+                            "id": str(uuid.uuid4()),
+                            "lid": str(l004.id),
+                            "p": period,
+                            "m": metric,
+                            "f": forecast_val,
+                            "a": actual_val,
+                            "v": var_pct,
+                        },
+                    )
+
+        # PRD comment on L-001 executive_summary.launch_vision
+        l001_prd = db.query(PRD).filter(PRD.launch_id == l001.id).first()
+        if l001_prd:
+            existing_cmt = db.execute(
+                text(
+                    "SELECT 1 FROM prd_comments WHERE prd_id = :pid AND section = 'executive_summary' AND field = 'launch_vision'"
+                ),
+                {"pid": str(l001_prd.id)},
+            ).first()
+            if not existing_cmt:
+                db.execute(
+                    text(
+                        "INSERT INTO prd_comments (id, prd_id, section, field, user_id, body, mentions) "
+                        "VALUES (:id, :pid, 'executive_summary', 'launch_vision', :uid, :body, CAST('[]' AS jsonb))"
+                    ),
+                    {
+                        "id": str(uuid.uuid4()),
+                        "pid": str(l001_prd.id),
+                        "uid": str(admin.id),
+                        "body": "Recommend tightening vision to a 12-month measurable outcome (e.g., reimbursed access in 30 IDNs).",
+                    },
+                )
 
         db.commit()
         print(f"Seed complete. Org: {org.slug}. Admin: admin@demo.example / demo123")

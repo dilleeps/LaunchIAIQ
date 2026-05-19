@@ -17,7 +17,8 @@ const navGroups: { label: string; items: { to: string; label: string; glyph: str
     label: "Workspace",
     items: [
       { to: "/launches", label: "Launches", glyph: "⎙" },
-      { to: "/reports", label: "Reports", glyph: "⎙" },
+      { to: "/scenarios", label: "Scenarios & IRP", glyph: "⚭" },
+      { to: "/reports", label: "Reports", glyph: "▤" },
       { to: "/admin", label: "Settings", glyph: "⚙" },
     ],
   },
@@ -37,9 +38,9 @@ export function AppShell() {
     <div className="grid h-screen overflow-hidden" style={{ gridTemplateColumns: "240px 1fr", gridTemplateRows: "64px 1fr", gridTemplateAreas: '"topbar topbar" "sidebar main"' }}>
       <header style={{ gridArea: "topbar" }} className="flex items-center gap-8 border-b border-line px-7 bg-paper">
         <div className="flex items-center gap-3.5">
-          <div className="w-8 h-8 rounded-full bg-accent grid place-items-center text-paper font-display font-semibold">L</div>
+          <div className="w-8 h-8 rounded-full bg-primary grid place-items-center text-paper font-display font-semibold">L</div>
           <div className="font-display text-lg tracking-tight">
-            LaunchIA<em className="text-accent not-italic font-normal">IQ</em>
+            LaunchIA<em className="text-primary not-italic font-normal">IQ</em>
           </div>
         </div>
         <div className="w-px h-6 bg-line" />
@@ -70,7 +71,7 @@ export function AppShell() {
                 end={item.to === "/"}
                 className={({ isActive }) =>
                   `flex items-center gap-2 px-3 py-2 rounded text-sm ${
-                    isActive ? "bg-accent-soft text-accent font-medium" : "text-ink-2 hover:bg-paper-3"
+                    isActive ? "bg-primary-soft text-primary font-medium" : "text-ink-2 hover:bg-paper-3"
                   }`
                 }
               >

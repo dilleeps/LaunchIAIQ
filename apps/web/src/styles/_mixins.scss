@@ -1,0 +1,10 @@
+@use "./variables" as *;
+
+// Reusable patterns. Use ONLY when Tailwind becomes repetitive — never to
+// duplicate utilities. Currently unused; lives here for future complex
+// selectors / animation keyframes.
+
+@mixin focus-ring {
+  outline: none;
+  box-shadow: 0 0 0 2px white, 0 0 0 4px $primary;
+}

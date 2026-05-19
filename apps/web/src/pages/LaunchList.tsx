@@ -26,7 +26,7 @@ export function LaunchList() {
             <tbody>
               {data?.map((ln) => (
                 <tr key={ln.id} className="border-b border-line last:border-0 hover:bg-paper-2">
-                  <td className="p-3 font-mono"><Link className="text-accent hover:underline" to={`/launches/${ln.id}`}>{ln.launch_code}</Link></td>
+                  <td className="p-3 font-mono"><Link className="text-primary hover:underline" to={`/launches/${ln.id}`}>{ln.launch_code}</Link></td>
                   <td className="p-3">{ln.asset.brand_name}</td>
                   <td className="p-3">{ln.country.name}</td>
                   <td className="p-3 text-mute-2">{ln.launch_type}</td>

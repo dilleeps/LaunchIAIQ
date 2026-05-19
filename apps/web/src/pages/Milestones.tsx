@@ -45,7 +45,7 @@ export function Milestones() {
                       <div>{ln?.asset.brand_name} · {ln?.country.name}</div>
                     </td>
                     <td className="p-3">
-                      {m.is_gate && <span className="text-accent mr-1">★</span>}
+                      {m.is_gate && <span className="text-primary mr-1">★</span>}
                       {m.name}
                     </td>
                     <td className="p-3 text-mute-2">{m.status}</td>

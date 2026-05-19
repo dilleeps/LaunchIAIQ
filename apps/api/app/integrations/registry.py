@@ -1,8 +1,9 @@
 from .base import BaseConnector
+from .clinicaltrials import ClinicalTrialsConnector
+from .cms_open_payments import CMSOpenPaymentsConnector
+from .dailymed import DailyMedConnector
 from .openfda import OpenFDAConnector
 from .stubs import (
-    ClinicalTrialsConnector,
-    DailyMedConnector,
     IQVIAOCEConnector,
     KeycloakSSOConnector,
     SAPConnector,
@@ -11,12 +12,15 @@ from .stubs import (
     VeevaVaultRIMConnector,
     WorkdayConnector,
 )
+from .who_gho import WHOGHOConnector
 
 
 _INSTANCES: list[BaseConnector] = [
     OpenFDAConnector(),
     ClinicalTrialsConnector(),
     DailyMedConnector(),
+    WHOGHOConnector(),
+    CMSOpenPaymentsConnector(),
     VeevaVaultRIMConnector(),
     VeevaPromoMatsConnector(),
     VeevaCRMConnector(),
