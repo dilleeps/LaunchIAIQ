@@ -1,6 +1,45 @@
 # Deploying LaunchIAIQ to AWS
 
-Target architecture: **ECS Fargate + RDS PostgreSQL + ALB**, with **Secrets Manager** for runtime config, **ECR** for images, **CloudWatch Logs** for observability, and **GitHub Actions OIDC** (no static AWS keys) for CI/CD.
+## ⚡ Fastest path: AWS CloudShell (no local setup, no credential files)
+
+CloudShell is a Linux terminal in your browser inside the AWS console; it inherits the IAM permissions of your logged-in console user, so **you never type or paste an access key**.
+
+1. Sign in to the AWS console → click the CloudShell icon (top-right toolbar) or visit <https://console.aws.amazon.com/cloudshell>.
+2. Paste the contents of `scripts/cloudshell-quickstart.sh` and run. It will:
+   - Install Terraform into `~/bin/` (CloudShell doesn't ship with it)
+   - Clone the repo (you'll be prompted for the URL)
+   - Run `scripts/aws-bootstrap.sh` end-to-end
+
+Total time: ~10 minutes (RDS provision is the slow step).
+
+When it finishes, the script prints the ALB URL — that's the live app.
+
+---
+
+## Local workstation alternative
+
+If you'd rather run from your own laptop:
+
+```bash
+# 1. Rotate any leaked AWS keys first. Then on YOUR machine (not in this chat):
+aws configure                 # creates ~/.aws/credentials locally
+
+# 2. From the repo root:
+./scripts/aws-bootstrap.sh    # provisions + first deploy in one shot
+```
+
+Subsequent deploys (after code changes):
+
+```bash
+./scripts/aws-deploy.sh       # builds + pushes + rolls
+```
+
+Or just push to `main` and let GitHub Actions OIDC handle it (no static keys needed in CI).
+
+---
+
+## Target architecture
+
 
 ```
 Internet ─► ALB (HTTPS) ─┬─► ECS Fargate service: web  (nginx + Vite dist)
