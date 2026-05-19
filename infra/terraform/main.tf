@@ -122,7 +122,7 @@ resource "aws_security_group" "alb" {
 
 resource "aws_security_group" "service" {
   name        = "${local.name}-service"
-  description = "ECS services — accept only from ALB"
+  description = "ECS services - accept only from ALB"
   vpc_id      = aws_vpc.this.id
 
   ingress {
@@ -142,7 +142,7 @@ resource "aws_security_group" "service" {
 
 resource "aws_security_group" "db" {
   name        = "${local.name}-db"
-  description = "RDS — accept only from ECS services"
+  description = "RDS - accept only from ECS services"
   vpc_id      = aws_vpc.this.id
 
   ingress {
