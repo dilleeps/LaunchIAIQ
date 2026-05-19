@@ -1,0 +1,62 @@
+name: deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  id-token: write   # required for OIDC
+  contents: read
+
+env:
+  AWS_REGION: us-east-1
+  PROJECT: launchiaiq
+  ENVIRONMENT: prod
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to ECR
+        id: ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Compute image tag
+        id: tag
+        run: echo "sha=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
+
+      - name: Build & push API image
+        env:
+          REGISTRY: ${{ steps.ecr.outputs.registry }}
+        run: |
+          IMAGE="$REGISTRY/${PROJECT}-${ENVIRONMENT}-api"
+          docker build -f infra/docker/api.Dockerfile -t "$IMAGE:${{ steps.tag.outputs.sha }}" -t "$IMAGE:latest" .
+          docker push "$IMAGE:${{ steps.tag.outputs.sha }}"
+          docker push "$IMAGE:latest"
+
+      - name: Build & push web image
+        env:
+          REGISTRY: ${{ steps.ecr.outputs.registry }}
+        run: |
+          IMAGE="$REGISTRY/${PROJECT}-${ENVIRONMENT}-web"
+          docker build -f infra/docker/web.Dockerfile -t "$IMAGE:${{ steps.tag.outputs.sha }}" -t "$IMAGE:latest" .
+          docker push "$IMAGE:${{ steps.tag.outputs.sha }}"
+          docker push "$IMAGE:latest"
+
+      - name: Force ECS rolling deploy
+        run: |
+          aws ecs update-service --cluster "${PROJECT}-${ENVIRONMENT}-cluster" --service "${PROJECT}-${ENVIRONMENT}-api" --force-new-deployment >/dev/null
+          aws ecs update-service --cluster "${PROJECT}-${ENVIRONMENT}-cluster" --service "${PROJECT}-${ENVIRONMENT}-web" --force-new-deployment >/dev/null
+
+      - name: Wait for services stable
+        run: |
+          aws ecs wait services-stable --cluster "${PROJECT}-${ENVIRONMENT}-cluster" --services "${PROJECT}-${ENVIRONMENT}-api" "${PROJECT}-${ENVIRONMENT}-web"

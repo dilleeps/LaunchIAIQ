@@ -1,0 +1,29 @@
+# Copy to terraform.tfvars and fill in (terraform.tfvars is gitignored).
+aws_region    = "us-east-1"
+environment   = "prod"
+project_name  = "launchiaiq"
+
+az_count                = 2
+db_instance_class       = "db.t4g.micro"
+db_allocated_storage_gb = 20
+
+api_cpu    = 512
+api_memory = 1024
+web_cpu    = 256
+web_memory = 512
+
+api_desired_count = 2
+web_desired_count = 2
+
+# Optional — leave blank for ALB DNS only (HTTP only).
+domain_name         = ""
+acm_certificate_arn = ""
+
+# Set in AWS, never paste live secrets here. Prefer:
+#   export TF_VAR_anthropic_api_key=$(aws secretsmanager get-secret-value …)
+# anthropic_api_key = ""
+# openfda_api_key   = ""
+
+# Enable GitHub Actions OIDC deploy role.
+github_owner = "your-org"
+github_repo  = "LaunchIAIQ"
