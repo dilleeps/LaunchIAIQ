@@ -7,7 +7,8 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from ..database import get_db
-from ..deps import get_current_user
+from ..deps import get_current_user, require_role
+_SCEN_WRITE = Depends(require_role("global_admin", "global_brand_lead", "finance", "market_access"))
 from ..models import Launch, User
 
 
@@ -53,7 +54,7 @@ def list_scenarios(
     return [dict(r) for r in rows]
 
 
-@router.post("")
+@router.post("", dependencies=[_SCEN_WRITE])
 def create_scenario(body: ScenarioIn, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
     if not db.query(Launch).filter(Launch.id == body.base_launch_id, Launch.org_id == user.org_id).first():
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Base launch not found")
@@ -76,7 +77,7 @@ def create_scenario(body: ScenarioIn, db: Session = Depends(get_db), user: User 
     return {"id": str(sid), "name": body.name, "base_launch_id": str(body.base_launch_id)}
 
 
-@router.post("/{scenario_id}/overrides")
+@router.post("/{scenario_id}/overrides", dependencies=[_SCEN_WRITE])
 def add_override(
     scenario_id: uuid.UUID,
     body: OverrideIn,

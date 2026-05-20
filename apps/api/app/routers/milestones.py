@@ -4,13 +4,16 @@ from datetime import date, timedelta
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
+from ..audit import log as audit_log
 from ..database import get_db
-from ..deps import get_current_user
+from ..deps import get_current_user, require_role
 from ..models import Launch, Milestone, User
 from ..schemas import MilestoneOut, MilestoneUpdateIn
 
 
 router = APIRouter(tags=["milestones"])
+
+_TRACKED_FIELDS = ["status", "target_date", "actual_date", "notes", "owner_user_id"]
 
 
 @router.get("/launches/{launch_id}/milestones", response_model=list[MilestoneOut])
@@ -42,7 +45,11 @@ def upcoming(
     )
 
 
-@router.patch("/milestones/{milestone_id}", response_model=MilestoneOut)
+@router.patch(
+    "/milestones/{milestone_id}",
+    response_model=MilestoneOut,
+    dependencies=[Depends(require_role("global_admin", "global_brand_lead", "country_launch_lead", "medical", "market_access"))],
+)
 def update_milestone(
     milestone_id: uuid.UUID,
     body: MilestoneUpdateIn,
@@ -57,8 +64,25 @@ def update_milestone(
     )
     if not ms:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Milestone not found")
+
+    before_snap = {f: getattr(ms, f) for f in _TRACKED_FIELDS}
     for k, v in body.model_dump(exclude_none=True).items():
         setattr(ms, k, v)
+    if body.status == "Complete" and not ms.actual_date:
+        ms.actual_date = date.today()
+
+    before, after = {}, {}
+    for f in _TRACKED_FIELDS:
+        nv = getattr(ms, f)
+        if before_snap[f] != nv:
+            before[f] = before_snap[f]
+            after[f] = nv
+    if before:
+        audit_log(
+            db, org_id=user.org_id, user_id=user.id,
+            entity="milestone", entity_id=ms.id, action="update",
+            before=before, after=after,
+        )
     db.commit()
     db.refresh(ms)
     return ms

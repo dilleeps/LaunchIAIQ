@@ -20,6 +20,7 @@ const navGroups: { label: string; items: { to: string; label: string; glyph: str
       { to: "/scenarios", label: "Scenarios & IRP", glyph: "⚭" },
       { to: "/competitive-intel", label: "Competitive intel", glyph: "◊" },
       { to: "/reports", label: "Reports", glyph: "▤" },
+      { to: "/audit", label: "Audit log", glyph: "⌖" },
       { to: "/admin", label: "Settings", glyph: "⚙" },
     ],
   },

@@ -7,7 +7,7 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from ..database import get_db
-from ..deps import get_current_user
+from ..deps import get_current_user, require_role
 from ..models import Forecast, Launch, User
 
 
@@ -33,7 +33,7 @@ def _monthly_targets(fc: Forecast) -> dict[str, dict[str, float]]:
     }
 
 
-@router.post("/launches/{launch_id}/actuals")
+@router.post("/launches/{launch_id}/actuals", dependencies=[Depends(require_role("global_admin", "finance"))])
 def post_actual(
     launch_id: uuid.UUID,
     body: ActualIn,

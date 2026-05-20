@@ -54,3 +54,23 @@ def register_org(body: RegisterOrgIn, db: Session = Depends(get_db)):
 @router.get("/me", response_model=UserOut)
 def me(user: User = Depends(get_current_user)):
     return user
+
+
+# Capability matrix the frontend reads to gate UI controls.
+_CAPS = {
+    "global_admin":         {"edit_launch", "edit_milestone", "edit_task", "delete_task", "edit_prd", "edit_risk", "edit_forecast", "edit_dependency", "edit_actuals", "approve_gate", "manage_integrations", "manage_users", "view_audit"},
+    "global_brand_lead":    {"edit_launch", "edit_milestone", "edit_task", "delete_task", "edit_prd", "edit_risk", "edit_forecast", "edit_dependency", "approve_gate", "view_audit"},
+    "country_launch_lead":  {"edit_milestone", "edit_task", "delete_task", "edit_prd", "edit_risk", "edit_dependency", "view_audit"},
+    "medical":              {"edit_milestone", "edit_task", "edit_prd", "view_audit"},
+    "market_access":        {"edit_milestone", "edit_task", "edit_prd", "edit_risk", "view_audit"},
+    "finance":              {"edit_forecast", "edit_actuals", "view_audit"},
+    "viewer":               set(),
+}
+
+
+@router.get("/capabilities")
+def capabilities(user: User = Depends(get_current_user)):
+    return {
+        "role": user.default_role,
+        "capabilities": sorted(_CAPS.get(user.default_role, set())),
+    }

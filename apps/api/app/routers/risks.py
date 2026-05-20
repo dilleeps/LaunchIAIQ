@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from ..database import get_db
-from ..deps import get_current_user
+from ..deps import get_current_user, require_role
 from ..models import Launch, Risk, RiskLaunchLink, User
 from ..schemas import RiskIn, RiskOut
 
@@ -32,7 +32,7 @@ def list_risks(
     return q.order_by(Risk.score.desc()).all()
 
 
-@router.post("", response_model=RiskOut)
+@router.post("", response_model=RiskOut, dependencies=[Depends(require_role("global_admin", "global_brand_lead", "country_launch_lead", "medical", "market_access"))])
 def create_risk(body: RiskIn, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
     data = body.model_dump(exclude={"launch_ids"})
     risk = Risk(org_id=user.org_id, score=_score(body.likelihood, body.impact), **data)

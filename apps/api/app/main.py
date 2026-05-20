@@ -11,6 +11,7 @@ from .routers import (
     approvals,
     assets,
     assistant,
+    audit,
     auth,
     comments,
     competitive_intel,
@@ -32,6 +33,7 @@ from .routers import (
     raci,
     risks,
     scenarios,
+    tasks,
     users,
     variance,
 )
@@ -84,6 +86,8 @@ app.include_router(assets.router)
 app.include_router(launches.router)
 app.include_router(portfolio.router)
 app.include_router(milestones.router)
+app.include_router(tasks.router)
+app.include_router(audit.router)
 app.include_router(prds.router)
 app.include_router(prd_import.router)
 app.include_router(risks.router)

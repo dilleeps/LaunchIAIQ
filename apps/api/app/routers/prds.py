@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from ..database import get_db
-from ..deps import get_current_user
+from ..deps import get_current_user, require_role
 from ..models import PRD, Launch, PRDFieldHistory, PRDVersion, User
 from ..schemas import PRDOut, PRDUpdateIn
 
@@ -48,7 +48,7 @@ def get_prd(launch_id: uuid.UUID, db: Session = Depends(get_db), user: User = De
     return PRDOut(id=prd.id, launch_id=launch_id, current_version=prd.current_version, payload=ver.payload if ver else {})
 
 
-@router.put("/launches/{launch_id}/prd", response_model=PRDOut)
+@router.put("/launches/{launch_id}/prd", response_model=PRDOut, dependencies=[Depends(require_role("global_admin", "global_brand_lead", "country_launch_lead", "medical", "market_access"))])
 def update_prd(
     launch_id: uuid.UUID,
     body: PRDUpdateIn,

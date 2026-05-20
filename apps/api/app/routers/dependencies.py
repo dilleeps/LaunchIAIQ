@@ -5,7 +5,8 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from ..database import get_db
-from ..deps import get_current_user
+from ..deps import get_current_user, require_role
+_DEP_WRITE = Depends(require_role("global_admin", "global_brand_lead", "country_launch_lead"))
 from ..models import Dependency, Launch, User
 from ..schemas import DependencyIn, DependencyOut
 
@@ -18,7 +19,7 @@ def list_deps(db: Session = Depends(get_db), user: User = Depends(get_current_us
     return db.query(Dependency).filter(Dependency.org_id == user.org_id).all()
 
 
-@router.post("/dependencies", response_model=DependencyOut)
+@router.post("/dependencies", response_model=DependencyOut, dependencies=[_DEP_WRITE])
 def create_dep(body: DependencyIn, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
     dep = Dependency(org_id=user.org_id, created_by=user.id, **body.model_dump())
     db.add(dep)
@@ -27,7 +28,7 @@ def create_dep(body: DependencyIn, db: Session = Depends(get_db), user: User = D
     return dep
 
 
-@router.delete("/dependencies/{dep_id}", status_code=204)
+@router.delete("/dependencies/{dep_id}", status_code=204, dependencies=[_DEP_WRITE])
 def delete_dep(dep_id: uuid.UUID, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
     dep = db.query(Dependency).filter(Dependency.id == dep_id, Dependency.org_id == user.org_id).first()
     if not dep:
