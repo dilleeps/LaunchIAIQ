@@ -1,12 +1,12 @@
-"""Takeda flagship pipeline launches + competitive intelligence seed.
+"""Demo pipeline launches + competitive intelligence seed.
 
-Adds 3 real Takeda Phase 3 assets and 15 country launches (5 markets each):
-- Oveporexton (TAK-861) — orexin-2 agonist, narcolepsy type 1
-- Rusfertide (TAK-587) — hepcidin mimetic, polycythemia vera
-- Zasocitinib (TAK-279) — oral TYK2 inhibitor, psoriasis / PsA
+Adds 3 Phase 3 pipeline assets and 15 country launches (5 markets each):
+- Oveporexton — orexin-2 agonist, narcolepsy type 1
+- Rusfertide — hepcidin mimetic, polycythemia vera
+- Zasocitinib — oral TYK2 inhibitor, psoriasis / PsA
 
 Pre-configures market-intel connectors with each asset's query terms so the
-Market Pulse tab on every Takeda launch populates with real records on first sync.
+Market Pulse tab on every demo launch populates with real records on first sync.
 Also seeds known competitors as static competitive_intel rows.
 
 Run after `python -m app.seed` (idempotent on launch_code).
@@ -37,8 +37,8 @@ from .models import (
 )
 
 
-# Real Takeda Phase 3 pipeline (publicly known as of 2025-2026)
-TAKEDA_ASSETS = [
+# Demo pipeline (3 Phase 3 assets used by the seed)
+PIPELINE_ASSETS = [
     {
         "brand_name": "Oveporexton",
         "inn": "oveporexton",
@@ -56,7 +56,6 @@ TAKEDA_ASSETS = [
             {"name": "Wakix (pitolisant)", "company": "Bioprojet/Harmony", "moa": "H3 inverse agonist", "stage": "Marketed"},
             {"name": "Xyrem / Xywav (oxybate)", "company": "Jazz Pharma", "moa": "GHB receptor", "stage": "Marketed"},
             {"name": "Sunosi (solriamfetol)", "company": "Axsome", "moa": "DNRI", "stage": "Marketed"},
-            {"name": "Orexin-2 agonist (TAK-925/danavorexton)", "company": "Takeda (terminated)", "moa": "OX2R", "stage": "Discontinued"},
         ],
     },
     {
@@ -202,7 +201,7 @@ def run() -> None:
         asset_objs: dict[str, Asset] = {}
         next_code_num = 100  # start above existing L-001..L-005 to keep ordering tidy
 
-        for asset_def in TAKEDA_ASSETS:
+        for asset_def in PIPELINE_ASSETS:
             asset, _ = _get_or_create(
                 db, Asset,
                 defaults={
@@ -347,7 +346,7 @@ def run() -> None:
                     },
                 ))
 
-        # Sample portfolio-wide risks specific to Takeda assets
+        # Sample portfolio-wide risks specific to seeded assets
         rsk = db.query(Risk).filter(Risk.description.like("%TYK2 class label%")).first()
         if not rsk and "Zasocitinib" in asset_objs:
             r = Risk(
@@ -388,11 +387,11 @@ def run() -> None:
                                       notes="Germany IRP basket impacts NICE benchmarking"))
 
         # Seed launch setup (assumptions, meetings, team members, activity tree)
-        # for every Takeda launch so the new wizard-shaped views light up
+        # for every seeded launch so the new wizard-shaped views light up
         _seed_launch_setup(db, org.id, asset_objs, countries_by_code)
 
         db.commit()
-        print(f"Takeda seed complete: 3 assets, {next_code_num - 100} country launches added.")
+        print(f"Pipeline seed complete: 3 assets, {next_code_num - 100} country launches added.")
     finally:
         db.close()
 

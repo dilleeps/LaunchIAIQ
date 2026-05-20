@@ -100,7 +100,7 @@ export function LaunchActivityTree({ launchId, brand, indication }: { launchId: 
 
   return (
     <div className="space-y-4">
-      {/* Header banner — mirrors Takeda "Global TAK-279 Plaque Psoriasis" header */}
+      {/* Header banner: brand · indication, overall status, commercial launch date countdown */}
       <div className="bg-card border border-line rounded-lg p-5">
         <div className="flex items-center justify-between mb-4">
           <div>

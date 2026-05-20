@@ -46,21 +46,21 @@ def reseed_base():
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"Base seed failed: {exc}")
 
 
-@router.post("/reseed/takeda", dependencies=[Depends(require_role("global_admin"))])
-def reseed_takeda():
+@router.post("/reseed/pipeline", dependencies=[Depends(require_role("global_admin"))])
+def reseed_pipeline():
     try:
-        mod = importlib.import_module("app.seed_takeda")
+        mod = importlib.import_module("app.seed_pipeline")
         importlib.reload(mod)
         mod.run()
-        return {"ok": True, "ran": "app.seed_takeda"}
+        return {"ok": True, "ran": "app.seed_pipeline"}
     except Exception as exc:
-        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"Takeda seed failed: {exc}")
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"Pipeline seed failed: {exc}")
 
 
 @router.post("/reseed/all", dependencies=[Depends(require_role("global_admin"))])
 def reseed_all():
     results = {}
-    for name in ("app.seed", "app.seed_takeda"):
+    for name in ("app.seed", "app.seed_pipeline"):
         try:
             mod = importlib.import_module(name)
             importlib.reload(mod)

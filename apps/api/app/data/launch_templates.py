@@ -1,17 +1,17 @@
-"""Launch framework templates — match Takeda's LaunchPad system.
+"""Launch framework templates — pharma-industry standard launch frameworks.
 
 Each template defines:
 - name      : human-readable label
 - scope     : Global / Region / Country
 - meetings  : default Launch Management Meeting cadence
-- groups    : ordered milestone groups (Product / Market / Takeda preparation)
+- groups    : ordered milestone groups (Product / Market / Internal preparation)
               each with a tree of activities (level 1 → level 2 → level 3)
 - assumptions_fields : which Key Launch Assumption dates the template surfaces
 """
 from __future__ import annotations
 
 
-# ----- Reusable milestone group tree (Takeda Global Launch Framework V8) -----
+# ----- Reusable milestone group tree (Global Launch Framework V8) -----
 
 _GLOBAL_V8_GROUPS = [
     {
@@ -102,8 +102,8 @@ _GLOBAL_V8_GROUPS = [
         ],
     },
     {
-        "key": "takeda_prep",
-        "name": "Takeda preparation",
+        "key": "internal_prep",
+        "name": "Internal preparation",
         "phase": "Internal",
         "activities": [
             {
@@ -160,7 +160,7 @@ _EUCAN_GROUPS = [
         ],
     },
     {
-        "key": "takeda_prep", "name": "Takeda preparation", "phase": "Internal",
+        "key": "internal_prep", "name": "Internal preparation", "phase": "Internal",
         "activities": [
             {"id": "8", "name": "Named Patient programs (pre-approval)", "importance": "High"},
             {"id": "9", "name": "EU forecast & in-country pricing", "importance": "Critical"},
@@ -190,7 +190,7 @@ _GEM_COUNTRY_GROUPS = [
         ],
     },
     {
-        "key": "takeda_prep", "name": "Takeda preparation", "phase": "Internal",
+        "key": "internal_prep", "name": "Internal preparation", "phase": "Internal",
         "activities": [
             {"id": "8", "name": "Country forecast"},
             {"id": "9", "name": "Field readiness"},

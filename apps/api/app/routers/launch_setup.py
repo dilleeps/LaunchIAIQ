@@ -1,5 +1,5 @@
 """Launch setup wizard — templates, key assumptions, meetings, team members,
-hierarchical activity tree. Matches Takeda's LaunchPad framework system.
+hierarchical activity tree. Pharma-industry standard launch framework model.
 """
 from __future__ import annotations
 
