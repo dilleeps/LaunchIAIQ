@@ -7,6 +7,7 @@ import { Button } from "../components/ui/button";
 import { Card } from "../components/ui/card";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "../components/ui/dialog";
 import { ConnectorForm } from "../components/ConnectorForm";
+import { SyncIntelByAsset } from "../components/SyncIntelByAsset";
 import { PageHeader } from "../components/PageHeader";
 
 interface ConnInfo {
@@ -64,6 +65,7 @@ export function Settings() {
         subtitle="Configure CRMs, ERPs, regulatory platforms, identity providers and free market-intelligence feeds. All settings encrypted at rest; sync schedules run nightly."
       />
       <div className="px-10 py-8 space-y-10">
+        <SyncIntelByAsset />
         <section>
           <h2 className="font-mono text-[11px] uppercase tracking-widest text-mute mb-3">Configured</h2>
           {conns?.length === 0 ? (

@@ -21,5 +21,6 @@ class BaseConnector(ABC):
 
     def _stamp(self, db: Session, row: IntegrationConnector, status: str) -> None:
         row.last_sync_at = datetime.utcnow()
-        row.last_sync_status = status
+        # Column is varchar(32) — keep status short so it always fits.
+        row.last_sync_status = (status or "")[:32]
         db.commit()

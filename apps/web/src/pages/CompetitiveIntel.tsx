@@ -1,8 +1,10 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useParams } from "react-router-dom";
+import { RefreshCw } from "lucide-react";
 import { api } from "../lib/api";
 import { PageHeader } from "../components/PageHeader";
 import { Card } from "../components/ui/card";
+import { Button } from "../components/ui/button";
 
 interface PortfolioRow {
   asset_id: string;
@@ -83,9 +85,14 @@ function PortfolioView() {
 }
 
 function AssetDetail({ assetId }: { assetId: string }) {
+  const qc = useQueryClient();
   const { data } = useQuery({
     queryKey: ["ci-asset", assetId],
     queryFn: () => api<AssetIntel>(`/competitive-intel/assets/${assetId}`),
+  });
+  const sync = useMutation({
+    mutationFn: () => api(`/intel/sync-asset/${assetId}`, { method: "POST" }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["ci-asset", assetId] }),
   });
   if (!data) return <div className="p-10 text-mute">Loading…</div>;
 
@@ -95,7 +102,15 @@ function AssetDetail({ assetId }: { assetId: string }) {
         eyebrow="Competitive intelligence"
         title={data.asset.brand_name}
         subtitle={`${data.asset.moa ?? ""} · ${data.asset.therapeutic_area ?? ""}`}
-        right={<Link to="/competitive-intel" className="text-sm text-primary hover:underline">← All assets</Link>}
+        right={
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" onClick={() => sync.mutate()} disabled={sync.isPending}>
+              <RefreshCw className={`w-3.5 h-3.5 mr-1.5 ${sync.isPending ? "animate-spin" : ""}`} />
+              {sync.isPending ? "Syncing…" : "Sync intel"}
+            </Button>
+            <Link to="/competitive-intel" className="text-sm text-primary hover:underline self-center">← All assets</Link>
+          </div>
+        }
       />
       <div className="px-10 py-8 space-y-8">
         <section>

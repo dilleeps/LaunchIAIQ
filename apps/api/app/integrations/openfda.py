@@ -48,15 +48,23 @@ class OpenFDAConnector(BaseConnector):
             search = f'openfda.brand_name:"{asset_query}"'
         with httpx.Client(timeout=20.0) as client:
             r = client.get(f"https://api.fda.gov/drug/label.json", params=self._params(search, limit))
+            # 404 = no matches for this query — that's a normal outcome for pre-approval assets
+            if r.status_code == 404:
+                return []
             r.raise_for_status()
             return r.json().get("results", [])
 
-    def fetch_drug_recalls(self, limit: int = 25) -> list[dict]:
+    def fetch_drug_recalls(self, asset_query: str | None = None, limit: int = 25) -> list[dict]:
+        search = "status:Ongoing"
+        if asset_query:
+            search = f'product_description:"{asset_query}" AND status:Ongoing'
         with httpx.Client(timeout=20.0) as client:
             r = client.get(
                 "https://api.fda.gov/drug/enforcement.json",
-                params=self._params("status:Ongoing", limit),
+                params=self._params(search, limit),
             )
+            if r.status_code == 404:
+                return []
             r.raise_for_status()
             return r.json().get("results", [])
 
@@ -66,7 +74,7 @@ class OpenFDAConnector(BaseConnector):
         asset_query = cfg.get("asset_query")
         try:
             labels = self.fetch_drug_labels(asset_query=asset_query, limit=cfg.get("limit", 25))
-            recalls = self.fetch_drug_recalls(limit=cfg.get("limit", 25))
+            recalls = self.fetch_drug_recalls(asset_query=asset_query, limit=cfg.get("limit", 25))
         except httpx.HTTPError as exc:
             self._stamp(db, connector_row, f"error: {exc}")
             return {"ok": False, "error": str(exc)}
