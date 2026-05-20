@@ -387,10 +387,158 @@ def run() -> None:
                                       link_type="references_price",
                                       notes="Germany IRP basket impacts NICE benchmarking"))
 
+        # Seed launch setup (assumptions, meetings, team members, activity tree)
+        # for every Takeda launch so the new wizard-shaped views light up
+        _seed_launch_setup(db, org.id, asset_objs, countries_by_code)
+
         db.commit()
         print(f"Takeda seed complete: 3 assets, {next_code_num - 100} country launches added.")
     finally:
         db.close()
+
+
+# ----- Launch setup backfill (assumptions + meetings + team + activities) -----
+
+_DEMO_TEAM_BY_COUNTRY = {
+    "USA": [("Sarah Chen", "Country Launch Leader", True), ("David Park", "Market Access Lead", False),
+            ("Lisa Wong", "Medical Affairs Lead", False), ("Mike Johnson", "Commercial Lead", False)],
+    "DEU": [("Hans Müller", "Country Launch Leader", True), ("Ingrid Schmidt", "AMNOG Lead", False),
+            ("Klaus Weber", "Medical Affairs Lead", False)],
+    "GBR": [("Emma Williams", "Country Launch Leader", True), ("James Cooper", "NICE Lead", False),
+            ("Sophie Brown", "Medical Affairs Lead", False)],
+    "FRA": [("Pierre Dubois", "Country Launch Leader", True), ("Marie Lefèvre", "HAS Lead", False),
+            ("Antoine Martin", "Medical Affairs Lead", False)],
+    "JPN": [("Kato Koki", "Country Launch Leader", True), ("Yuki Tanaka", "PMDA Lead", False),
+            ("Hiroshi Sato", "Medical Affairs Lead", False)],
+}
+
+
+def _seed_launch_setup(db, org_id, asset_objs, countries_by_code) -> None:
+    from .data.launch_templates import TEMPLATES, get_template, flatten_for_seed
+    import uuid as _uuid
+
+    # Pick template per region
+    def _pick_template(country_code: str) -> str:
+        if country_code == "USA":
+            return "global_launch_framework_v8"
+        if country_code in ("DEU",):
+            return "german_launch"
+        if country_code == "JPN":
+            return "japan_launch"
+        if country_code in ("GBR", "FRA"):
+            return "eucan_simplified"
+        return "global_launch_framework_v8"
+
+    for asset in asset_objs.values():
+        launches = db.query(Launch).filter(Launch.org_id == org_id, Launch.asset_id == asset.id).all()
+        for launch in launches:
+            country = db.query(Country).filter(Country.id == launch.country_id).first()
+            if not country:
+                continue
+            tmpl_key = _pick_template(country.code)
+            tmpl = get_template(tmpl_key)
+
+            # Skip if already seeded
+            existing_setup = db.execute(
+                text("SELECT 1 FROM launch_setup WHERE launch_id = :id"), {"id": launch.id}
+            ).first()
+            if existing_setup:
+                continue
+
+            tgt = launch.target_launch_date or (date.today() + timedelta(days=365))
+            reg_sub = tgt - timedelta(days=545)
+            reg_app = launch.reg_approval_date or (tgt - timedelta(days=90))
+            price_sub = reg_app + timedelta(days=14)
+            price_app = reg_app + timedelta(days=180)
+            reim_sub = price_app + timedelta(days=30)
+            reim_app = reim_sub + timedelta(days=120)
+            trade = tgt - timedelta(days=14)
+            p3 = reg_sub - timedelta(days=180)
+
+            db.execute(text("""
+                INSERT INTO launch_setup (
+                    launch_id, template_key, franchise, brand, indication_label, region,
+                    commercial_launch_date, regulatory_submission, regulatory_approval,
+                    pricing_submission, pricing_approval, reimbursement_submission,
+                    reimbursement_approval, trade_stock_available, phase3_results,
+                    mrp_value, mrp_currency, mrp_year, cumulative_mrp
+                ) VALUES (
+                    :lid, :tk, :fr, :br, :ind, :rg,
+                    :cld, :rs, :ra, :ps, :pa, :rms, :rma, :tsa, :p3,
+                    :mv, :mc, :my, :cmrp
+                )
+                ON CONFLICT (launch_id) DO NOTHING
+            """), {
+                "lid": launch.id, "tk": tmpl_key,
+                "fr": asset.therapeutic_area, "br": asset.brand_name,
+                "ind": None, "rg": country.region,
+                "cld": tgt, "rs": reg_sub, "ra": reg_app,
+                "ps": price_sub, "pa": price_app,
+                "rms": reim_sub, "rma": reim_app,
+                "tsa": trade, "p3": p3,
+                "mv": 250_000_000, "mc": country.currency_code or "USD",
+                "my": tgt.year + 4, "cmrp": 1_200_000_000,
+            })
+
+            # Meetings — defaults from template
+            for m in tmpl["meetings"]:
+                db.execute(text("""
+                    INSERT INTO launch_meetings (
+                        id, launch_id, meeting_key, name, cadence,
+                        day_of_month, offset_months_before_launch, recurring
+                    ) VALUES (:id, :lid, :k, :n, :c, :dom, :off, :r)
+                    ON CONFLICT (launch_id, meeting_key) DO NOTHING
+                """), {
+                    "id": _uuid.uuid4(), "lid": launch.id,
+                    "k": m["key"], "n": m["name"], "c": m["cadence"],
+                    "dom": m["default"] if m["config_field"] == "day_of_month" else None,
+                    "off": m["default"] if m["config_field"] == "offset_months_before_launch" else None,
+                    "r": m["cadence"] == "monthly",
+                })
+
+            # Team members — demo roster per country
+            team = _DEMO_TEAM_BY_COUNTRY.get(country.code, [])
+            for name, role, mgr in team:
+                db.execute(text("""
+                    INSERT INTO launch_team_members (
+                        id, launch_id, full_name, role_label, country_code, is_manager, therapy_area
+                    ) VALUES (:id, :lid, :fn, :rl, :cc, :mgr, :ta)
+                """), {
+                    "id": _uuid.uuid4(), "lid": launch.id, "fn": name, "rl": role,
+                    "cc": country.code, "mgr": mgr, "ta": asset.therapeutic_area,
+                })
+
+            # Activity tree
+            rows = flatten_for_seed(tmpl["groups"])
+            id_by_ordinal: dict = {}
+            for r in rows:
+                new_id = _uuid.uuid4()
+                id_by_ordinal[r["ordinal"]] = new_id
+                pid = id_by_ordinal.get(r["parent_ordinal"]) if r["parent_ordinal"] else None
+                # Auto-mark first group as in progress for visual feedback
+                stat = "Complete" if r["ordinal"].startswith("1.1") else ("In Progress" if r["ordinal"].startswith("1") else "Not Started")
+                start = reg_sub - timedelta(days=730) if r["level"] == 1 else None
+                end = tgt + timedelta(days=30) if r["level"] == 1 else None
+                db.execute(text("""
+                    INSERT INTO launch_activities (
+                        id, launch_id, parent_id, group_key, group_name, ordinal, level,
+                        name, status, country_code, importance, manual_complete,
+                        start_date, end_date, organisation, assigned_count
+                    ) VALUES (
+                        :id, :lid, :pid, :gk, :gn, :ord, :lv,
+                        :nm, :st, :cc, :imp, false,
+                        :sd, :ed, :org, 0
+                    )
+                    ON CONFLICT (launch_id, ordinal) DO NOTHING
+                """), {
+                    "id": new_id, "lid": launch.id, "pid": pid,
+                    "gk": r["group_key"], "gn": r["group_name"],
+                    "ord": r["ordinal"], "lv": r["level"],
+                    "nm": r["name"], "st": stat,
+                    "cc": "Global" if r["level"] <= 2 else country.code,
+                    "imp": r["importance"], "sd": start, "ed": end,
+                    "org": "Global" if r["level"] <= 2 else country.name,
+                })
 
 
 if __name__ == "__main__":

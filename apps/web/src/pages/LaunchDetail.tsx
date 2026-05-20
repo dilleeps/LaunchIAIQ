@@ -17,13 +17,15 @@ import { PageHeader, RagChip } from "../components/PageHeader";
 import { ActivityFeed, WatchToggle } from "../components/ActivityFeed";
 import { BudgetTab } from "../components/BudgetTab";
 import { PRDComments } from "../components/PRDComments";
+import { LaunchActivityTree } from "../components/LaunchActivityTree";
+import { LaunchTeamTab } from "../components/LaunchTeamTab";
 
-const tabs = ["PRD", "Milestones", "Risks", "KPIs", "Forecast", "Budget", "Market Pulse", "Dependencies", "Activity"] as const;
+const tabs = ["Activities", "Team", "PRD", "Milestones", "Risks", "KPIs", "Forecast", "Budget", "Market Pulse", "Dependencies", "Activity"] as const;
 type Tab = (typeof tabs)[number];
 
 export function LaunchDetail() {
   const { id } = useParams();
-  const [tab, setTab] = useState<Tab>("PRD");
+  const [tab, setTab] = useState<Tab>("Activities");
   const { data: launch } = useQuery({
     queryKey: ["launch", id],
     queryFn: () => api<Launch>(`/launches/${id}`),
@@ -61,6 +63,8 @@ export function LaunchDetail() {
         </div>
       </div>
       <div className="px-10 py-8">
+        {tab === "Activities" && <LaunchActivityTree launchId={launch.id} brand={launch.asset.brand_name} indication={launch.asset.therapeutic_area || undefined} />}
+        {tab === "Team" && <LaunchTeamTab launchId={launch.id} countryCode={launch.country.code} />}
         {tab === "PRD" && <PRDTab launchId={launch.id} />}
         {tab === "Milestones" && <MilestonesTab launchId={launch.id} />}
         {tab === "Risks" && <RisksTab launchId={launch.id} />}

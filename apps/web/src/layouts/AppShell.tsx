@@ -19,6 +19,7 @@ const navGroups: { label: string; items: { to: string; label: string; glyph: str
     label: "Workspace",
     items: [
       { to: "/launches", label: "Launches", glyph: "⎙" },
+      { to: "/my-launch-team", label: "My Launch Team", glyph: "☺" },
       { to: "/scenarios", label: "Scenarios & IRP", glyph: "⚭" },
       { to: "/competitive-intel", label: "Competitive intel", glyph: "◊" },
       { to: "/reports", label: "Reports", glyph: "▤" },

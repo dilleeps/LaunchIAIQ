@@ -148,6 +148,99 @@ _STATEMENTS: list[str] = [
     )
     """,
     "CREATE UNIQUE INDEX IF NOT EXISTS uq_field_permissions ON field_permissions(role_name, entity, field)",
+    # ----- Launch setup (template, assumptions, meetings, team, activity tree) -----
+    """
+    CREATE TABLE IF NOT EXISTS launch_setup (
+        launch_id uuid PRIMARY KEY,
+        template_key text NULL,
+        franchise text NULL,
+        brand text NULL,
+        indication_label text NULL,
+        region text NULL,
+        business_partner text NULL,
+        local_launch_leader_user_id uuid NULL,
+        commercial_launch_date date NULL,
+        regulatory_submission date NULL,
+        regulatory_approval date NULL,
+        pricing_submission date NULL,
+        pricing_approval date NULL,
+        reimbursement_submission date NULL,
+        reimbursement_approval date NULL,
+        trade_stock_available date NULL,
+        phase3_results date NULL,
+        amnog_dossier_submission date NULL,
+        gba_decision date NULL,
+        nhi_price_listing date NULL,
+        mrp_value numeric NULL,
+        mrp_currency varchar(8) NULL,
+        mrp_year int NULL,
+        cumulative_mrp numeric NULL,
+        not_applicable jsonb DEFAULT '[]'::jsonb,
+        pending_confirmation jsonb DEFAULT '[]'::jsonb,
+        created_at timestamp DEFAULT now(),
+        updated_at timestamp DEFAULT now()
+    )
+    """,
+    """
+    CREATE TABLE IF NOT EXISTS launch_meetings (
+        id uuid PRIMARY KEY,
+        launch_id uuid NOT NULL,
+        meeting_key text NOT NULL,
+        name text NOT NULL,
+        cadence text NOT NULL,
+        day_of_month int NULL,
+        offset_months_before_launch int NULL,
+        scheduled_date date NULL,
+        recurring boolean DEFAULT false,
+        notes text NULL,
+        created_at timestamp DEFAULT now()
+    )
+    """,
+    "CREATE INDEX IF NOT EXISTS ix_launch_meetings_launch ON launch_meetings(launch_id)",
+    "CREATE UNIQUE INDEX IF NOT EXISTS uq_launch_meetings_key ON launch_meetings(launch_id, meeting_key)",
+    """
+    CREATE TABLE IF NOT EXISTS launch_team_members (
+        id uuid PRIMARY KEY,
+        launch_id uuid NOT NULL,
+        user_id uuid NULL,
+        full_name text NULL,
+        email text NULL,
+        role_label text NOT NULL,
+        country_code varchar(3) NULL,
+        is_manager boolean DEFAULT false,
+        therapy_area text NULL,
+        added_at timestamp DEFAULT now()
+    )
+    """,
+    "CREATE INDEX IF NOT EXISTS ix_team_members_launch ON launch_team_members(launch_id)",
+    "CREATE INDEX IF NOT EXISTS ix_team_members_user ON launch_team_members(user_id)",
+    """
+    CREATE TABLE IF NOT EXISTS launch_activities (
+        id uuid PRIMARY KEY,
+        launch_id uuid NOT NULL,
+        parent_id uuid NULL,
+        group_key text NOT NULL,
+        group_name text NOT NULL,
+        ordinal text NOT NULL,
+        level int NOT NULL DEFAULT 1,
+        name text NOT NULL,
+        status text DEFAULT 'Not Started',
+        country_code varchar(16) NULL,
+        importance text DEFAULT 'Standard',
+        manual_complete boolean DEFAULT false,
+        start_date date NULL,
+        end_date date NULL,
+        organisation text NULL,
+        owner_user_id uuid NULL,
+        assigned_count int DEFAULT 0,
+        created_at timestamp DEFAULT now(),
+        updated_at timestamp DEFAULT now()
+    )
+    """,
+    "CREATE INDEX IF NOT EXISTS ix_launch_activities_launch ON launch_activities(launch_id)",
+    "CREATE INDEX IF NOT EXISTS ix_launch_activities_parent ON launch_activities(parent_id)",
+    "CREATE INDEX IF NOT EXISTS ix_launch_activities_group ON launch_activities(launch_id, group_key)",
+    "CREATE UNIQUE INDEX IF NOT EXISTS uq_launch_activities_ordinal ON launch_activities(launch_id, ordinal)",
 ]
 
 

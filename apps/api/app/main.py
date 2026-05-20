@@ -26,6 +26,7 @@ from .routers import (
     irp,
     kpis,
     launches,
+    launch_setup,
     lookups,
     market_intel,
     milestones,
@@ -89,6 +90,7 @@ app.include_router(auth.router)
 app.include_router(lookups.router)
 app.include_router(assets.router)
 app.include_router(launches.router)
+app.include_router(launch_setup.router)
 app.include_router(portfolio.router)
 app.include_router(milestones.router)
 app.include_router(tasks.router)

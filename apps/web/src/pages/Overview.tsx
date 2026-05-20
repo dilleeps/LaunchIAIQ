@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { api } from "../lib/api";
@@ -5,6 +6,7 @@ import type { Launch, OverviewStat } from "../lib/types";
 import { PageHeader, RagChip } from "../components/PageHeader";
 import { ImportPRD } from "../components/ImportPRD";
 import { ActivityFeed } from "../components/ActivityFeed";
+import { NewLaunchWizard } from "../components/NewLaunchWizard";
 
 const fmtCurrency = (n: number, ccy: string) => {
   if (n >= 1e9) return `${(n / 1e9).toFixed(1)} B ${ccy}`;
@@ -13,6 +15,7 @@ const fmtCurrency = (n: number, ccy: string) => {
 };
 
 export function Overview() {
+  const [wizardOpen, setWizardOpen] = useState(false);
   const { data: stats } = useQuery({
     queryKey: ["overview"],
     queryFn: () => api<OverviewStat>("/portfolio/overview"),
@@ -31,10 +34,16 @@ export function Overview() {
         right={
           <div className="flex gap-2">
             <ImportPRD />
-            <button className="px-3 py-2 bg-primary text-paper rounded text-sm hover:bg-primary-dark font-mono uppercase tracking-wider text-[11px]">+ New launch</button>
+            <button
+              onClick={() => setWizardOpen(true)}
+              className="px-3 py-2 bg-primary text-paper rounded text-sm hover:bg-primary-dark font-mono uppercase tracking-wider text-[11px]"
+            >
+              + New launch
+            </button>
           </div>
         }
       />
+      {wizardOpen && <NewLaunchWizard onClose={() => setWizardOpen(false)} />}
 
       <section className="px-10 py-8 grid grid-cols-4 gap-6">
         <StatCard

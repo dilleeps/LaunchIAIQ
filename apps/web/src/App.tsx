@@ -18,6 +18,7 @@ import { CompetitiveIntel } from "./pages/CompetitiveIntel";
 import { Audit } from "./pages/Audit";
 import { Regulatory } from "./pages/Regulatory";
 import { Readiness } from "./pages/Readiness";
+import { MyLaunchTeam } from "./pages/MyLaunchTeam";
 import { useAuth } from "./hooks/useAuth";
 
 const qc = new QueryClient({ defaultOptions: { queries: { staleTime: 30_000 } } });
@@ -53,6 +54,7 @@ export default function App() {
           <Route path="competitive-intel/:assetId" element={<CompetitiveIntel />} />
           <Route path="audit" element={<Audit />} />
           <Route path="readiness" element={<Readiness />} />
+          <Route path="my-launch-team" element={<MyLaunchTeam />} />
           <Route path="regulatory" element={<Regulatory />} />
           <Route path="admin" element={<Settings />} />
         </Route>
