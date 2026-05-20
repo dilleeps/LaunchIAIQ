@@ -1,6 +1,6 @@
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 
 from .config import settings
@@ -47,6 +47,19 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title="LaunchAIQ API", version="0.2.0", lifespan=lifespan)
+
+@app.middleware("http")
+async def strip_api_prefix(request: Request, call_next):
+    """Frontend (Vite dev convention) calls /api/*. ALB routes /api/* to this
+    container without rewriting; FastAPI routes don't include the prefix. Strip
+    it here so /api/auth/login and /auth/login both work."""
+    path = request.scope.get("path", "")
+    if path.startswith("/api/"):
+        new_path = path[4:] or "/"
+        request.scope["path"] = new_path
+        request.scope["raw_path"] = new_path.encode("utf-8")
+    return await call_next(request)
+
 
 origins = [o.strip() for o in settings.cors_origins.split(",") if o.strip()]
 app.add_middleware(
