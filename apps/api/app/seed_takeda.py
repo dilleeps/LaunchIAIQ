@@ -138,9 +138,11 @@ FINANCIALS = {
 
 
 def _ensure_competitive_intel_table(db) -> None:
+    # No DEFAULT gen_random_uuid() — RDS doesn't ship pgcrypto enabled for
+    # non-superuser roles. We generate UUIDs in Python on insert instead.
     db.execute(text("""
         CREATE TABLE IF NOT EXISTS competitive_intel (
-            id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+            id uuid PRIMARY KEY,
             org_id uuid NOT NULL,
             asset_id uuid NOT NULL,
             competitor_name text NOT NULL,
@@ -156,6 +158,7 @@ def _ensure_competitive_intel_table(db) -> None:
 
 
 def _insert_competitor(db, org_id, asset_id, c: dict) -> None:
+    import uuid as _uuid
     existing = db.execute(
         text("SELECT 1 FROM competitive_intel WHERE asset_id = :a AND competitor_name = :n"),
         {"a": str(asset_id), "n": c["name"]},
@@ -163,9 +166,10 @@ def _insert_competitor(db, org_id, asset_id, c: dict) -> None:
     if existing:
         return
     db.execute(
-        text("""INSERT INTO competitive_intel (org_id, asset_id, competitor_name, company, moa, stage)
-                VALUES (:o, :a, :n, :c, :m, :s)"""),
-        {"o": str(org_id), "a": str(asset_id), "n": c["name"], "c": c.get("company"), "m": c.get("moa"), "s": c.get("stage")},
+        text("""INSERT INTO competitive_intel (id, org_id, asset_id, competitor_name, company, moa, stage)
+                VALUES (:id, :o, :a, :n, :c, :m, :s)"""),
+        {"id": str(_uuid.uuid4()), "o": str(org_id), "a": str(asset_id), "n": c["name"],
+         "c": c.get("company"), "m": c.get("moa"), "s": c.get("stage")},
     )
 
 
@@ -174,8 +178,6 @@ def run() -> None:
 
     db = SessionLocal()
     try:
-        db.execute(text("CREATE EXTENSION IF NOT EXISTS pgcrypto"))
-        db.commit()
         _ensure_competitive_intel_table(db)
 
         org = db.query(Organization).filter(Organization.slug == "demo").first()

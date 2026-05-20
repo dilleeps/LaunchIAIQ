@@ -35,12 +35,15 @@ if [[ "${RUN_MIGRATIONS:-true}" == "true" ]]; then
 fi
 
 # 4. Seed demo data — base then Takeda. Both are idempotent.
+#    Errors print full traceback so we can diagnose seed failures in CloudWatch.
 if [[ "${SEED_ON_BOOT:-true}" == "true" ]]; then
-  echo "[entrypoint] seeding base demo data"
-  python -m app.seed || echo "[entrypoint] WARNING: base seed failed (continuing)"
+  echo "[entrypoint] ▶ seeding base demo data"
+  python -m app.seed 2>&1 || echo "[entrypoint] ⚠ base seed exited non-zero (continuing)"
 
-  echo "[entrypoint] seeding Takeda 3-launch portfolio"
-  python -m app.seed_takeda || echo "[entrypoint] WARNING: Takeda seed failed (continuing)"
+  echo "[entrypoint] ▶ seeding Takeda 3-launch portfolio"
+  python -m app.seed_takeda 2>&1 || echo "[entrypoint] ⚠ Takeda seed exited non-zero (continuing)"
+
+  echo "[entrypoint] ✓ seed phase complete"
 fi
 
 exec "$@"
