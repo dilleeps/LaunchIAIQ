@@ -8,6 +8,7 @@ from .database import engine
 from .jobs.scheduler import build_scheduler
 from .migrations_phase2 import apply_phase2_migrations
 from .routers import (
+    admin,
     approvals,
     assets,
     assistant,
@@ -88,6 +89,7 @@ app.include_router(portfolio.router)
 app.include_router(milestones.router)
 app.include_router(tasks.router)
 app.include_router(audit.router)
+app.include_router(admin.router)
 app.include_router(prds.router)
 app.include_router(prd_import.router)
 app.include_router(risks.router)

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -euo pipefail
+set -uo pipefail
 
 # 1. Wait for DB to be reachable.
 if [[ -n "${DATABASE_URL:-}" ]]; then
@@ -24,20 +24,23 @@ fi
 # 2. Alembic migrations (idempotent).
 if [[ "${RUN_MIGRATIONS:-true}" == "true" ]]; then
   echo "[entrypoint] alembic upgrade head"
-  alembic upgrade head
+  alembic upgrade head || echo "[entrypoint] WARNING: alembic upgrade failed (continuing)"
 fi
 
 # 3. Phase-2 raw-SQL migrations (idempotent CREATE TABLE IF NOT EXISTS).
 if [[ "${RUN_MIGRATIONS:-true}" == "true" ]]; then
   echo "[entrypoint] applying Phase-2 migrations"
-  python -c "from app.database import engine; from app.migrations_phase2 import apply_phase2_migrations; apply_phase2_migrations(engine)"
+  python -c "from app.database import engine; from app.migrations_phase2 import apply_phase2_migrations; apply_phase2_migrations(engine)" \
+    || echo "[entrypoint] WARNING: phase-2 migration failed (continuing)"
 fi
 
-# 4. Seed demo data (idempotent — _get_or_create guards every row).
-#    Default ON for first deploy; set SEED_ON_BOOT=false to disable later.
+# 4. Seed demo data — base then Takeda. Both are idempotent.
 if [[ "${SEED_ON_BOOT:-true}" == "true" ]]; then
-  echo "[entrypoint] seeding demo data"
-  python -m app.seed
+  echo "[entrypoint] seeding base demo data"
+  python -m app.seed || echo "[entrypoint] WARNING: base seed failed (continuing)"
+
+  echo "[entrypoint] seeding Takeda 3-launch portfolio"
+  python -m app.seed_takeda || echo "[entrypoint] WARNING: Takeda seed failed (continuing)"
 fi
 
 exec "$@"
