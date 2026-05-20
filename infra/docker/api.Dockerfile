@@ -18,7 +18,7 @@ COPY apps/api/alembic ./alembic
 COPY apps/api/alembic.ini ./alembic.ini
 
 RUN pip install --upgrade pip \
-    && pip install --prefix=/install ".[]" \
+    && pip install --prefix=/install "." \
     && pip install --prefix=/install "bcrypt<4.1"
 
 # ---- runtime ----
