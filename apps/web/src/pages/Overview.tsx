@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { api } from "../lib/api";
 import type { Launch, OverviewStat } from "../lib/types";
 import { PageHeader, RagChip } from "../components/PageHeader";
+import { ImportPRD } from "../components/ImportPRD";
 
 const fmtCurrency = (n: number, ccy: string) => {
   if (n >= 1e9) return `${(n / 1e9).toFixed(1)} B ${ccy}`;
@@ -28,7 +29,7 @@ export function Overview() {
         subtitle="Asset × Country launches tracked across regulatory, market access, medical, commercial and supply workstreams. Open dependencies surface upstream/downstream risk in one click."
         right={
           <div className="flex gap-2">
-            <button className="px-3 py-2 border border-line rounded text-sm hover:bg-paper-3 font-mono uppercase tracking-wider text-[11px]">Export</button>
+            <ImportPRD />
             <button className="px-3 py-2 bg-primary text-paper rounded text-sm hover:bg-primary-dark font-mono uppercase tracking-wider text-[11px]">+ New launch</button>
           </div>
         }

@@ -13,6 +13,7 @@ from .routers import (
     assistant,
     auth,
     comments,
+    competitive_intel,
     dependencies,
     forecasts,
     fx,
@@ -26,6 +27,7 @@ from .routers import (
     milestones,
     permissions,
     portfolio,
+    prd_import,
     prds,
     raci,
     risks,
@@ -83,6 +85,7 @@ app.include_router(launches.router)
 app.include_router(portfolio.router)
 app.include_router(milestones.router)
 app.include_router(prds.router)
+app.include_router(prd_import.router)
 app.include_router(risks.router)
 app.include_router(raci.router)
 app.include_router(kpis.router)
@@ -97,6 +100,7 @@ app.include_router(variance.router)
 app.include_router(gates.router)
 app.include_router(approvals.router)
 app.include_router(comments.router)
+app.include_router(competitive_intel.router)
 app.include_router(permissions.router)
 app.include_router(assistant.router)
 app.include_router(users.router)
