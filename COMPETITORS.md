@@ -1,12 +1,12 @@
 # Competitive Landscape — Pharma Launch Management
 
-LaunchIAIQ sits in the **pharma-native launch cockpit** category. Most adjacent tools either (a) cover a slice of the launch workflow deeply but don't model the portfolio holistically (Veeva, Aktana, Within3, Komodo), or (b) are generic project tools without a pharma data model (Smartsheet, Monday, Asana). The dedicated launch-excellence suites (IQVIA, ZS, Trinity, Indegene) are consulting-led, six-figure-plus, and slow to deploy.
+LaunchAIQ sits in the **pharma-native launch cockpit** category. Most adjacent tools either (a) cover a slice of the launch workflow deeply but don't model the portfolio holistically (Veeva, Aktana, Within3, Komodo), or (b) are generic project tools without a pharma data model (Smartsheet, Monday, Asana). The dedicated launch-excellence suites (IQVIA, ZS, Trinity, Indegene) are consulting-led, six-figure-plus, and slow to deploy.
 
 ## Feature matrix
 
 Legend: ● full · ◐ partial · ○ none / unknown.
 
-| Capability | LaunchIAIQ | IQVIA Launch Excellence | Veeva Vault RIM+PromoMats+CRM | ZS REVO / Launch Excellence | Trinity TGaS | Aktana | Within3 | Indegene LE | Komodo Sentinel | OptimizeRx | Smartsheet/Monday |
+| Capability | LaunchAIQ | IQVIA Launch Excellence | Veeva Vault RIM+PromoMats+CRM | ZS REVO / Launch Excellence | Trinity TGaS | Aktana | Within3 | Indegene LE | Komodo Sentinel | OptimizeRx | Smartsheet/Monday |
 |---|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
 | Portfolio hierarchy (Portfolio → Asset → Indication → Launch → Workstream → Task) | ● | ◐ | ○ | ◐ | ○ | ○ | ○ | ◐ | ○ | ○ | ○ |
 | Asset × Country matrix view | ● | ● | ○ | ● | ● | ○ | ○ | ◐ | ○ | ○ | ◐ |
@@ -59,11 +59,11 @@ Legend: ● full · ◐ partial · ○ none / unknown.
 | WHO ICTRP | Global trial meta-search | weekly XML | 2 |
 | RxNorm / NDC directory | Drug normalization | REST | 2 |
 
-Paid alternatives (GlobalData, Evaluate Pharma, Cortellis, IQVIA MIDAS) deliberately **out of scope** — the value of LaunchIAIQ is precisely that the free sources cover the regulatory + HTA + trial spine of competitive intelligence without a six-figure data licence.
+Paid alternatives (GlobalData, Evaluate Pharma, Cortellis, IQVIA MIDAS) deliberately **out of scope** — the value of LaunchAIQ is precisely that the free sources cover the regulatory + HTA + trial spine of competitive intelligence without a six-figure data licence.
 
 ## Positioning summary
 
 - **vs. IQVIA / ZS:** comparable launch-tracking depth at SMB pricing, deploys in days not quarters, no consulting tie-in.
-- **vs. Veeva stack:** Veeva is the system of record for regulatory documents and field activity, **not** a portfolio launch cockpit. LaunchIAIQ integrates with Veeva (Phase 2) rather than competing.
+- **vs. Veeva stack:** Veeva is the system of record for regulatory documents and field activity, **not** a portfolio launch cockpit. LaunchAIQ integrates with Veeva (Phase 2) rather than competing.
 - **vs. Smartsheet/Monday:** pharma data model out of the box — milestone templates for NCE/LE/biosimilar, HTA-aware Asset × Country grid, typed dependencies, RACI tied to workstreams.
-- **vs. paid intel platforms (Komodo, Definitive, IQVIA MIDAS):** complementary. LaunchIAIQ aggregates **free public** regulatory/HTA/trial intelligence and surfaces it inline on the launch where it's actionable.
+- **vs. paid intel platforms (Komodo, Definitive, IQVIA MIDAS):** complementary. LaunchAIQ aggregates **free public** regulatory/HTA/trial intelligence and surfaces it inline on the launch where it's actionable.

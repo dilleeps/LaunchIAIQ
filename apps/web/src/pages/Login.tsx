@@ -42,7 +42,7 @@ export function Login() {
           <div className="w-10 h-10 rounded-full bg-primary grid place-items-center text-primary-foreground font-display font-semibold text-xl">L</div>
           <div>
             <div className="font-display text-2xl tracking-tight">
-              LaunchIA<em className="text-primary not-italic font-normal">IQ</em>
+              Launch<em className="text-primary not-italic font-normal">AIQ</em>
             </div>
             <div className="font-mono text-[10px] uppercase tracking-widest text-mute">Pharma launch cockpit</div>
           </div>

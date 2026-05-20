@@ -40,7 +40,7 @@ export function AppShell() {
         <div className="flex items-center gap-3.5">
           <div className="w-8 h-8 rounded-full bg-primary grid place-items-center text-paper font-display font-semibold">L</div>
           <div className="font-display text-lg tracking-tight">
-            LaunchIA<em className="text-primary not-italic font-normal">IQ</em>
+            Launch<em className="text-primary not-italic font-normal">AIQ</em>
           </div>
         </div>
         <div className="w-px h-6 bg-line" />

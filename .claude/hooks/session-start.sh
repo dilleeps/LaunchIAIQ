@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# LaunchIAIQ — SessionStart hook for Claude Code on the web.
+# LaunchAIQ — SessionStart hook for Claude Code on the web.
 # Boots Postgres, sets up the Python venv + Alembic schema + seed, installs npm deps.
 # Idempotent: safe to re-run.
 

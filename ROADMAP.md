@@ -1,4 +1,4 @@
-# LaunchIAIQ Roadmap
+# LaunchAIQ Roadmap
 
 ## Phase 1 — MVP scaffold (this PR) ✓
 

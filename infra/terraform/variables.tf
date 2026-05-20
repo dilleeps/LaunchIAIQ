@@ -103,7 +103,7 @@ variable "github_owner" {
 }
 
 variable "github_repo" {
-  description = "GitHub repository name (e.g. 'LaunchIAIQ'). Required for OIDC CI role."
+  description = "GitHub repository name (e.g. 'LaunchAIQ'). Required for OIDC CI role."
   type        = string
   default     = ""
 }

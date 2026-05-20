@@ -46,7 +46,7 @@ async def lifespan(app: FastAPI):
         sched.shutdown(wait=False)
 
 
-app = FastAPI(title="LaunchIAIQ API", version="0.2.0", lifespan=lifespan)
+app = FastAPI(title="LaunchAIQ API", version="0.2.0", lifespan=lifespan)
 
 origins = [o.strip() for o in settings.cors_origins.split(",") if o.strip()]
 app.add_middleware(

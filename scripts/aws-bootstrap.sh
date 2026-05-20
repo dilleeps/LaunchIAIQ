@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# One-shot AWS bootstrap for LaunchIAIQ.
+# One-shot AWS bootstrap for LaunchAIQ.
 # Runs Terraform to create VPC + RDS + ECR + ECS + ALB + Secrets + GHA OIDC,
 # then prints the next-step commands.
 #
@@ -85,7 +85,7 @@ aws ecs wait services-stable \
 cat <<EOF
 
 ══════════════════════════════════════════════════════════════════════════════
- LaunchIAIQ is live: http://$ALB_DNS
+ LaunchAIQ is live: http://$ALB_DNS
 ══════════════════════════════════════════════════════════════════════════════
 
 Next steps:

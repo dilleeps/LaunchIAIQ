@@ -1,4 +1,4 @@
-# Deploying LaunchIAIQ to AWS
+# Deploying LaunchAIQ to AWS
 
 ## ⚡ Fastest path: AWS CloudShell (no local setup, no credential files)
 

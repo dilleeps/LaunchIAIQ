@@ -1,7 +1,7 @@
 [project]
-name = "launchiaiq-api"
+name = "launchaiq-api"
 version = "0.1.0"
-description = "LaunchIAIQ — pharma launch cockpit API"
+description = "LaunchAIQ — pharma launch cockpit API"
 requires-python = ">=3.11"
 dependencies = [
   "fastapi>=0.115",

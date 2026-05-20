@@ -1,4 +1,4 @@
-# LaunchIAIQ
+# LaunchAIQ
 
 A pharma-native drug-launch cockpit. React + FastAPI + Postgres. Multi-tenant, full RBAC, free-source market intelligence baked in.
 

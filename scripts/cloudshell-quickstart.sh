@@ -20,11 +20,11 @@ if ! command -v terraform >/dev/null 2>&1; then
 fi
 
 # ── Clone the repo (skip if already present) ─────────────────────────────
-if [ ! -d ~/LaunchIAIQ ]; then
-  read -p "Git clone URL for LaunchIAIQ: " REPO_URL
-  git clone "$REPO_URL" ~/LaunchIAIQ
+if [ ! -d ~/LaunchAIQ ]; then
+  read -p "Git clone URL for LaunchAIQ: " REPO_URL
+  git clone "$REPO_URL" ~/LaunchAIQ
 fi
 
 # ── Run the bootstrap ────────────────────────────────────────────────────
-cd ~/LaunchIAIQ
+cd ~/LaunchAIQ
 bash scripts/aws-bootstrap.sh

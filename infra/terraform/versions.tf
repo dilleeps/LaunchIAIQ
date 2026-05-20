@@ -27,7 +27,7 @@ provider "aws" {
 
   default_tags {
     tags = {
-      Project     = "LaunchIAIQ"
+      Project     = "LaunchAIQ"
       Environment = var.environment
       ManagedBy   = "terraform"
     }
