@@ -93,6 +93,9 @@ def run() -> None:
     apply_phase2_migrations(engine)
     db = SessionLocal()
     try:
+        # Advisory lock so only one container in a multi-replica deploy seeds at a time.
+        # Other replicas block here briefly, then find data already present and become no-ops.
+        db.execute(text("SELECT pg_advisory_lock(727292727292)"))
         # Org + admin
         org, _ = _get_or_create(db, Organization, name="Demo Pharma Co.", slug="demo")
         admin = db.query(User).filter(User.email == "admin@demo.example").first()
@@ -541,6 +544,11 @@ def run() -> None:
         db.commit()
         print(f"Seed complete. Org: {org.slug}. Admin: admin@demo.example / demo123")
     finally:
+        try:
+            db.execute(text("SELECT pg_advisory_unlock(727292727292)"))
+            db.commit()
+        except Exception:
+            pass
         db.close()
 
 
