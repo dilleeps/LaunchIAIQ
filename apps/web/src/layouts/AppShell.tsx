@@ -6,6 +6,7 @@ const navGroups: { label: string; items: { to: string; label: string; glyph: str
     label: "Portfolio",
     items: [
       { to: "/", label: "Overview", glyph: "◐" },
+      { to: "/readiness", label: "Readiness", glyph: "◎" },
       { to: "/timeline", label: "Timeline", glyph: "▭" },
       { to: "/matrix", label: "Asset × Country", glyph: "▦" },
       { to: "/dependencies", label: "Dependencies", glyph: "◇" },

@@ -14,8 +14,11 @@ import type {
   Risk,
 } from "../lib/types";
 import { PageHeader, RagChip } from "../components/PageHeader";
+import { ActivityFeed, WatchToggle } from "../components/ActivityFeed";
+import { BudgetTab } from "../components/BudgetTab";
+import { PRDComments } from "../components/PRDComments";
 
-const tabs = ["PRD", "Milestones", "Risks", "KPIs", "Forecast", "Market Pulse", "Dependencies"] as const;
+const tabs = ["PRD", "Milestones", "Risks", "KPIs", "Forecast", "Budget", "Market Pulse", "Dependencies", "Activity"] as const;
 type Tab = (typeof tabs)[number];
 
 export function LaunchDetail() {
@@ -35,7 +38,12 @@ export function LaunchDetail() {
         eyebrow={`${launch.launch_code} · ${launch.country.name} · ${launch.country.hta_body ?? ""}`}
         title={launch.asset.brand_name}
         subtitle={`${launch.asset.therapeutic_area ?? ""} · ${launch.launch_type ?? ""} · ${launch.launch_phase ?? ""}`}
-        right={<RagChip rag={launch.overall_rag} />}
+        right={
+          <div className="flex items-center gap-2">
+            <WatchToggle launchId={launch.id} />
+            <RagChip rag={launch.overall_rag} />
+          </div>
+        }
       />
       <div className="border-b border-line px-10">
         <div className="flex gap-6">
@@ -58,8 +66,10 @@ export function LaunchDetail() {
         {tab === "Risks" && <RisksTab launchId={launch.id} />}
         {tab === "KPIs" && <KPIsTab launchId={launch.id} />}
         {tab === "Forecast" && <ForecastTab launchId={launch.id} />}
+        {tab === "Budget" && <BudgetTab launchId={launch.id} />}
         {tab === "Market Pulse" && <MarketPulseTab brand={launch.asset.brand_name} country={launch.country.code} ta={launch.asset.therapeutic_area} />}
         {tab === "Dependencies" && <DependenciesTab launchId={launch.id} />}
+        {tab === "Activity" && <ActivityFeed launchId={launch.id} />}
       </div>
     </>
   );
@@ -72,21 +82,26 @@ function PRDTab({ launchId }: { launchId: string }) {
   });
   if (!prd) return <div className="text-mute">Loading PRD…</div>;
   return (
-    <div className="space-y-8">
-      <div className="font-mono text-[11px] uppercase tracking-widest text-mute">PRD v{prd.current_version}</div>
-      {Object.entries(prd.payload).map(([section, fields]) => (
-        <section key={section} className="border border-line rounded-lg p-6 bg-paper">
-          <h2 className="font-display text-xl tracking-tight mb-4 capitalize">{section.replace(/_/g, " ")}</h2>
-          <dl className="grid grid-cols-2 gap-x-8 gap-y-3 text-sm">
-            {Object.entries(fields as Record<string, any>).map(([k, v]) => (
-              <div key={k}>
-                <dt className="font-mono text-[10px] uppercase tracking-wider text-mute mb-1">{k.replace(/_/g, " ")}</dt>
-                <dd>{String(v ?? "—")}</dd>
-              </div>
-            ))}
-          </dl>
-        </section>
-      ))}
+    <div className="grid grid-cols-[1fr_320px] gap-6">
+      <div className="space-y-8">
+        <div className="font-mono text-[11px] uppercase tracking-widest text-mute">PRD v{prd.current_version}</div>
+        {Object.entries(prd.payload).map(([section, fields]) => (
+          <section key={section} className="border border-line rounded-lg p-6 bg-paper">
+            <h2 className="font-display text-xl tracking-tight mb-4 capitalize">{section.replace(/_/g, " ")}</h2>
+            <dl className="grid grid-cols-2 gap-x-8 gap-y-3 text-sm">
+              {Object.entries(fields as Record<string, any>).map(([k, v]) => (
+                <div key={k}>
+                  <dt className="font-mono text-[10px] uppercase tracking-wider text-mute mb-1">{k.replace(/_/g, " ")}</dt>
+                  <dd>{String(v ?? "—")}</dd>
+                </div>
+              ))}
+            </dl>
+          </section>
+        ))}
+      </div>
+      <div>
+        <PRDComments prdId={prd.id} />
+      </div>
     </div>
   );
 }

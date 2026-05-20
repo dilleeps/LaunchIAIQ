@@ -9,11 +9,13 @@ from .jobs.scheduler import build_scheduler
 from .migrations_phase2 import apply_phase2_migrations
 from .routers import (
     admin,
+    activity,
     approvals,
     assets,
     assistant,
     audit,
     auth,
+    budget,
     comments,
     competitive_intel,
     dependencies,
@@ -32,6 +34,7 @@ from .routers import (
     prd_import,
     prds,
     raci,
+    readiness,
     regulatory,
     risks,
     scenarios,
@@ -91,6 +94,9 @@ app.include_router(milestones.router)
 app.include_router(tasks.router)
 app.include_router(audit.router)
 app.include_router(admin.router)
+app.include_router(activity.router)
+app.include_router(budget.router)
+app.include_router(readiness.router)
 app.include_router(prds.router)
 app.include_router(prd_import.router)
 app.include_router(risks.router)

@@ -4,6 +4,7 @@ import { api } from "../lib/api";
 import type { Launch, OverviewStat } from "../lib/types";
 import { PageHeader, RagChip } from "../components/PageHeader";
 import { ImportPRD } from "../components/ImportPRD";
+import { ActivityFeed } from "../components/ActivityFeed";
 
 const fmtCurrency = (n: number, ccy: string) => {
   if (n >= 1e9) return `${(n / 1e9).toFixed(1)} B ${ccy}`;
@@ -61,6 +62,10 @@ export function Overview() {
               : "All caught up"
           }
         />
+      </section>
+
+      <section className="px-10 pb-6">
+        <ActivityFeed mode="me" />
       </section>
 
       <section className="px-10 pb-12">
