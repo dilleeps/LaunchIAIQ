@@ -11,6 +11,7 @@ const navGroups: { label: string; items: { to: string; label: string; glyph: str
       { to: "/dependencies", label: "Dependencies", glyph: "◇" },
       { to: "/risks", label: "Risks", glyph: "◭" },
       { to: "/milestones", label: "Milestones", glyph: "◉" },
+      { to: "/regulatory", label: "Regulatory pathways", glyph: "⊞" },
     ],
   },
   {

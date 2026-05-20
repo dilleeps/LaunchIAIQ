@@ -32,6 +32,7 @@ from .routers import (
     prd_import,
     prds,
     raci,
+    regulatory,
     risks,
     scenarios,
     tasks,
@@ -94,6 +95,7 @@ app.include_router(prds.router)
 app.include_router(prd_import.router)
 app.include_router(risks.router)
 app.include_router(raci.router)
+app.include_router(regulatory.router)
 app.include_router(kpis.router)
 app.include_router(forecasts.router)
 app.include_router(dependencies.router)
