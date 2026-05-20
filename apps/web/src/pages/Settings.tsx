@@ -73,14 +73,24 @@ export function Settings() {
               {conns?.map((c) => {
                 const meta = available?.find((a) => a.kind === c.kind);
                 const schema = getSchema(c.kind);
+                // Derive a human-readable target so duplicates are distinguishable
+                const target =
+                  c.config?.asset_query ||
+                  c.config?.query ||
+                  c.config?.manufacturer ||
+                  c.config?.indicator ||
+                  c.config?.label ||
+                  "all (no filter)";
                 return (
                   <Card key={c.id} className="p-5">
                     <div className="flex items-start justify-between mb-2">
-                      <div>
+                      <div className="min-w-0">
                         <div className="font-medium">{meta?.label ?? c.kind}</div>
-                        <div className="text-xs text-mute font-mono mt-0.5">{c.kind}</div>
+                        <div className="text-xs text-mute font-mono mt-0.5 truncate">
+                          {c.kind} · monitors <b className="text-ink-2">{target}</b>
+                        </div>
                       </div>
-                      <span className="chip rag-Green">enabled</span>
+                      <span className="chip rag-Green shrink-0 ml-2">enabled</span>
                     </div>
                     <div className="text-xs text-mute-2 mt-3 grid grid-cols-2 gap-y-1">
                       <span className="text-mute">Last sync</span>

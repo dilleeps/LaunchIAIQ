@@ -30,6 +30,7 @@ def list_conns(db: Session = Depends(get_db), user: User = Depends(get_current_u
             "enabled": r.enabled,
             "last_sync_at": r.last_sync_at.isoformat() if r.last_sync_at else None,
             "last_sync_status": r.last_sync_status,
+            "config": r.config or {},
         }
         for r in rows
     ]
