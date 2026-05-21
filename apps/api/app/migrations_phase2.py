@@ -241,6 +241,15 @@ _STATEMENTS: list[str] = [
     "CREATE INDEX IF NOT EXISTS ix_launch_activities_parent ON launch_activities(parent_id)",
     "CREATE INDEX IF NOT EXISTS ix_launch_activities_group ON launch_activities(launch_id, group_key)",
     "CREATE UNIQUE INDEX IF NOT EXISTS uq_launch_activities_ordinal ON launch_activities(launch_id, ordinal)",
+    # ----- Per-asset extra search terms for market-intel sync fan-out -----
+    """
+    CREATE TABLE IF NOT EXISTS asset_search_terms (
+        asset_id uuid NOT NULL,
+        term text NOT NULL,
+        PRIMARY KEY (asset_id, term)
+    )
+    """,
+    "CREATE INDEX IF NOT EXISTS ix_asset_search_terms_asset ON asset_search_terms(asset_id)",
 ]
 
 

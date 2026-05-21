@@ -218,6 +218,18 @@ def run() -> None:
             )
             asset_objs[asset_def["brand_name"]] = asset
 
+            # Asset search terms — research codes + INN + intel_terms — used by
+            # the market-intel sync to fan out queries (ClinicalTrials.gov often
+            # only indexes the research code, not the brand name, for pipeline drugs)
+            for term in [asset_def["code"], asset_def["inn"], *asset_def.get("intel_terms", [])]:
+                if not term:
+                    continue
+                db.execute(
+                    text("INSERT INTO asset_search_terms (asset_id, term) VALUES (:a, :t) "
+                         "ON CONFLICT DO NOTHING"),
+                    {"a": str(asset.id), "t": term.strip()},
+                )
+
             # Competitive intel rows
             for comp in asset_def["competitors"]:
                 _insert_competitor(db, org.id, asset.id, comp)
